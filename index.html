@@ -1,40 +1,65 @@
 <!DOCTYPE html>
+
 <html>
 <head>
-<title>AWS CI/CD Student Portal system 360 </title>
+<title>AWS CI/CD Student Portal System 360</title>
 
 <style>
 body{
-font-family:Arial;
-background:#f4f4f4;
-text-align:center;
+    font-family:Arial;
+    background:#f4f4f4;
+    text-align:center;
 }
 
 h1{
-margin-top:50px;
+    margin-top:30px;
+    color:#232F3E;
+}
+
+h2{
+    color:#232F3E;
+}
+
+input{
+    width:250px;
+    padding:10px;
+    margin:5px;
+    border:1px solid #ccc;
+    border-radius:5px;
 }
 
 button{
-background:orange;
-color:white;
-border:none;
-padding:15px 30px;
-font-size:18px;
-cursor:pointer;
-border-radius:5px;
+    background:orange;
+    color:white;
+    border:none;
+    padding:12px 25px;
+    font-size:16px;
+    cursor:pointer;
+    border-radius:5px;
+    margin:5px;
+}
+
+button:hover{
+    opacity:0.9;
 }
 
 #students{
-margin-top:30px;
+    margin-top:30px;
 }
 
 .card{
-background:white;
-width:350px;
-margin:15px auto;
-padding:20px;
-border-radius:10px;
-box-shadow:0 0 10px rgba(0,0,0,0.2);
+    background:white;
+    width:350px;
+    margin:15px auto;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 0 10px rgba(0,0,0,0.2);
+}
+
+#count{
+    font-size:22px;
+    font-weight:bold;
+    color:#232F3E;
 }
 </style>
 
@@ -42,51 +67,124 @@ box-shadow:0 0 10px rgba(0,0,0,0.2);
 
 <body>
 
-<h1>AWS CI/CD Student Portal 360 </h1>
+<h1>AWS CI/CD Student Portal System 360</h1>
+
+<h2>Total Students:
+<span id="count">0</span>
+</h2>
+
+<hr>
+
+<h2>Add Student</h2>
+
+<input id="id" placeholder="Student ID"><br>
+
+<input id="name" placeholder="Student Name"><br>
+
+<input id="course" placeholder="Course"><br>
+
+<button onclick="addStudent()">
+Add Student
+</button>
 
 <button onclick="loadStudents()">
 Load Student Data
 </button>
 
+<hr>
+
 <div id="students"></div>
 
 <script>
 
+const API_BASE =
+"https://qmr6oisu79.execute-api.ap-south-1.amazonaws.com/pord";
+
+async function addStudent(){
+
+    try{
+
+        const response = await fetch(
+            API_BASE + "/addstudent",
+            {
+                method:"POST",
+                headers:{
+                    "Content-Type":"application/json"
+                },
+                body:JSON.stringify({
+                    id:document.getElementById("id").value,
+                    name:document.getElementById("name").value,
+                    course:document.getElementById("course").value
+                })
+            }
+        );
+
+        const result = await response.json();
+
+        alert("Student Added Successfully");
+
+        loadStudents();
+
+    }catch(error){
+
+        alert("Failed To Add Student");
+
+        console.error(error);
+
+    }
+
+}
+
 async function loadStudents(){
 
-const container=document.getElementById("students");
+    const container =
+    document.getElementById("students");
 
-container.innerHTML="Loading...";
+    container.innerHTML =
+    "Loading...";
 
-try{
+    try{
 
-const response=await fetch(
-"https://qmr6oisu79.execute-api.ap-south-1.amazonaws.com/pord/data"
-);
+        const response = await fetch(
+            API_BASE + "/data"
+        );
 
-const data=await response.json();
+        const data =
+        await response.json();
 
-container.innerHTML="";
+        document.getElementById("count")
+        .innerHTML = data.length;
 
-data.forEach(student=>{
+        container.innerHTML = "";
 
-container.innerHTML+=`
-<div class="card">
-<h2>${student.name}</h2>
-<p>ID: ${student.id}</p>
-<p>Course: ${student.course}</p>
-</div>
-`;
+        data.forEach(student => {
 
-});
+            container.innerHTML += `
+            <div class="card">
 
-}catch(error){
+                <h2>${student.name}</h2>
 
-container.innerHTML="<h2>Error Loading Data</h2>";
+                <p>ID: ${student.id}</p>
+
+                <p>Course: ${student.course}</p>
+
+            </div>
+            `;
+
+        });
+
+    }catch(error){
+
+        container.innerHTML =
+        "<h2>Error Loading Data</h2>";
+
+        console.error(error);
+
+    }
 
 }
 
-}
+window.onload = loadStudents;
 
 </script>
 
