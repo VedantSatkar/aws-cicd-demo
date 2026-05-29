@@ -1,48 +1,41 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-
 <title>AWS CI/CD Student Portal</title>
 
 <style>
-
 body{
-    font-family:Arial;
-    background:#f5f5f5;
-    text-align:center;
-    padding:20px;
+font-family:Arial;
+background:#f4f4f4;
+text-align:center;
 }
 
 h1{
-    color:#232f3e;
-}
-
-input{
-    width:250px;
-    padding:10px;
-    margin:5px;
+margin-top:50px;
 }
 
 button{
-    background:#ff9900;
-    color:white;
-    border:none;
-    padding:12px 20px;
-    border-radius:5px;
-    cursor:pointer;
-    margin:5px;
+background:orange;
+color:white;
+border:none;
+padding:15px 30px;
+font-size:18px;
+cursor:pointer;
+border-radius:5px;
+}
+
+#students{
+margin-top:30px;
 }
 
 .card{
-    background:white;
-    width:350px;
-    margin:15px auto;
-    padding:15px;
-    border-radius:10px;
-    box-shadow:0 2px 8px rgba(0,0,0,0.2);
+background:white;
+width:350px;
+margin:15px auto;
+padding:20px;
+border-radius:10px;
+box-shadow:0 0 10px rgba(0,0,0,0.2);
 }
-
 </style>
 
 </head>
@@ -51,93 +44,51 @@ button{
 
 <h1>AWS CI/CD Student Portal</h1>
 
-<h2>Add Student</h2>
-
-<input id="id" placeholder="Student ID"><br>
-
-<input id="name" placeholder="Student Name"><br>
-
-<input id="course" placeholder="Course"><br>
-
-<button onclick="addStudent()">
-Add Student
-</button>
-
 <button onclick="loadStudents()">
 Load Student Data
 </button>
 
-<div id="result"></div>
+<div id="students"></div>
 
 <script>
 
-const API_BASE =
-"https://qmr6oisu79.execute-api.ap-south-1.amazonaws.com/pord";
-
-async function addStudent(){
-
-    const id =
-    document.getElementById("id").value;
-
-    const name =
-    document.getElementById("name").value;
-
-    const course =
-    document.getElementById("course").value;
-
-    const response = await fetch(
-        API_BASE + "/addstudent",
-        {
-            method:"POST",
-            headers:{
-                "Content-Type":"application/json"
-            },
-            body:JSON.stringify({
-                id:id,
-                name:name,
-                course:course
-            })
-        }
-    );
-
-    const result = await response.json();
-
-    alert(result.message);
-
-    loadStudents();
-}
-
 async function loadStudents(){
 
-    const response = await fetch(
-        API_BASE + "/data"
-    );
+const container=document.getElementById("students");
 
-    const students = await response.json();
+container.innerHTML="Loading...";
 
-    let html = "";
+try{
 
-    students.forEach(student => {
+const response=await fetch(
+"https://qmr6oisu79.execute-api.ap-south-1.amazonaws.com/pord/data"
+);
 
-        html += `
-        <div class="card">
+const data=await response.json();
 
-            <h2>${student.name}</h2>
+container.innerHTML="";
 
-            <p>ID: ${student.id}</p>
+data.forEach(student=>{
 
-            <p>Course: ${student.course}</p>
+container.innerHTML+=`
+<div class="card">
+<h2>${student.name}</h2>
+<p>ID: ${student.id}</p>
+<p>Course: ${student.course}</p>
+</div>
+`;
 
-        </div>
-        `;
-    });
+});
 
-    document.getElementById("result").innerHTML =
-    html;
+}catch(error){
+
+container.innerHTML="<h2>Error Loading Data</h2>";
+
+}
+
 }
 
 </script>
 
 </body>
-
 </html>
